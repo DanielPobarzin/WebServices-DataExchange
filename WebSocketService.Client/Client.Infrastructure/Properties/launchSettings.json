@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Client.Infrastructure": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
