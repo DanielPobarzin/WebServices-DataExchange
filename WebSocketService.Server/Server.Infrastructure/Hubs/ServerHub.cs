@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using Server.Application.Interfaces.Services;
+using Server.Application.Services;
 using Server.Domain.Messages;
 using Server.Infrastructure.Connection;
 using SignalRSwaggerGen.Attributes;

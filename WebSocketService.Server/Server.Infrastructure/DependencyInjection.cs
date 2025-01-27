@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Server.Application.Interfaces.Services;
 using Server.Application.Services;
 using Server.DataApplicationLayer;
 using Server.DataApplicationLayer.Extensions;
 using Server.Domain.Messages;
+using Server.Infrastructure.ConfigurationApp;
 
 namespace Server.Infrastructure
 {

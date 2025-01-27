@@ -1,10 +1,22 @@
 ﻿using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
-using Server.Application.Interfaces.Services;
 using Server.Domain.Messages;
 
 namespace Server.Application.Services;
+
+/// <summary>
+/// Служба логгирования
+/// </summary>
+public interface ILogService : ILogger
+{
+	/// <summary>
+	/// Выполнить запись сообщения
+	/// </summary>
+	/// <param name="msg"></param>
+	/// <returns></returns>
+	Task Write(LogMessage msg);
+}
 
 /// <inheritdoc cref="ILogService"/>
 public sealed class LogService: ILogService

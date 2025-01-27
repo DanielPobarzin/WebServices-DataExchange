@@ -9,9 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Server.Application.Interfaces.Services;
 using Server.Application.Services;
 using Server.Domain.Messages;
+using Server.Infrastructure.ConfigurationApp;
 using Server.Infrastructure.Connection;
 using Server.Infrastructure.Controllers;
 using Server.Infrastructure.Hubs;
@@ -21,6 +21,36 @@ using System.Reflection;
 
 namespace Server.Infrastructure
 {
+	/// <summary>
+	/// Служба обслуживания хоста
+	/// </summary>
+	public interface ISelfHost
+	{
+		/// <summary>
+		/// Запуск хостовой службы
+		/// </summary>
+		/// <param name="setting"></param>
+		/// <param name="cancellationToken"></param>
+		/// <returns></returns>
+		Task StartHostedServiceAsync(AppSetting setting, CancellationToken cancellationToken = default);
+
+		/// <summary>
+		/// Останов хостовой службы
+		/// </summary>
+		/// <param name="cancellationToken"></param>
+		/// <returns></returns>
+		Task StopHostedServiceAsync(CancellationToken cancellationToken = default);
+
+		/// <summary>
+		/// Перезапуск хостовой службы
+		/// </summary>
+		/// <param name="setting"></param>
+		/// <param name="cancellationToken"></param>
+		/// <returns></returns>
+		Task RebootHostedServiceAsync(AppSetting setting, CancellationToken cancellationToken = default);
+
+	}
+
 	/// <inheritdoc cref="ISelfHost"/>
 	public sealed class SelfHost : ISelfHost
 	{
@@ -39,25 +69,21 @@ namespace Server.Infrastructure
 		}
 		#region implementation of ISelfHost
 
-		public Task RebootHostedServiceAsync(IConfiguration configuration, CancellationToken cancellationToken = default) => ResultExtensions.TryCatchAsync(
+		public Task RebootHostedServiceAsync(AppSetting setting, CancellationToken cancellationToken = default) => ResultExtensions.TryCatchAsync(
 			async () =>
 			{
 				if (_host is null)
-					return StartHostedServiceAsync(configuration, cancellationToken);
+					return StartHostedServiceAsync(setting, cancellationToken);
 
 				await StopHostedServiceAsync(cancellationToken);
-				return StartHostedServiceAsync(configuration, cancellationToken);
+				return StartHostedServiceAsync(setting, cancellationToken);
 			}, cancellationToken).MatchErrorAsync(async ex =>
 			await _logger.Write(new LogError(ex, "SelfHostService", ex.Message)), token: cancellationToken);
 
-		public Task StartHostedServiceAsync(IConfiguration configuration, CancellationToken cancellationToken = default) => ResultExtensions.TryCatchAsync(
+		public Task StartHostedServiceAsync(AppSetting setting, CancellationToken cancellationToken = default) => ResultExtensions.TryCatchAsync(
 			async () =>
 			{
-				var urls  = configuration.GetSection("Host:urls").Value;
-				if (urls is null)
-					throw new ArgumentNullException(nameof(urls));
-				
-				_host = await CreateSelfHost(urls.Split(";"));
+				_host = await CreateSelfHost(setting);
 				await _host.StartAsync(cancellationToken);
 				await Task.WhenAll(_logger.Write(new LogMessage("Hosted service has been started.", "SelfHostService")),
 					_host.WaitForShutdownAsync(cancellationToken));
@@ -80,7 +106,7 @@ namespace Server.Infrastructure
 
 		#endregion
 
-		private static Task<IHost> CreateSelfHost(string[] urls) =>
+		private static Task<IHost> CreateSelfHost(AppSetting setting) =>
 			Host.CreateDefaultBuilder()
 				.ConfigureAppConfiguration((_, config) =>
 				{
@@ -88,7 +114,7 @@ namespace Server.Infrastructure
 				})
 				.ConfigureWebHostDefaults(webBuilder =>
 				{
-					webBuilder.UseUrls(urls);
+					webBuilder.UseUrls(setting.GetUrls);
 					webBuilder.ConfigureServices(services =>
 						{
 							services.AddCors(options =>
@@ -123,7 +149,7 @@ namespace Server.Infrastructure
 											var authRequest = (AccessToken: context.Request.Query["access_token"],
 												context.HttpContext.Request.Path);
 											if (!string.IsNullOrEmpty(authRequest.AccessToken) &&
-											    authRequest.Path.StartsWithSegments("/hub"))
+											    authRequest.Path.StartsWithSegments(setting.RouteHub))
 												context.Token = authRequest.AccessToken;
 
 											return Task.CompletedTask;
@@ -221,10 +247,10 @@ namespace Server.Infrastructure
 							{
 								endpoints.MapControllers();
 
-								endpoints.MapHub<ServerHub>("/hub", options =>
+								endpoints.MapHub<ServerHub>(setting.RouteHub, options =>
 								{
 									options.Transports = HttpTransportType.WebSockets;
-									options.WebSockets.CloseTimeout = TimeSpan.FromSeconds(15);
+									options.WebSockets.CloseTimeout = TimeSpan.FromSeconds(setting.CloseTimeout);
 									options.TransportSendTimeout = TimeSpan.FromSeconds(15);
 								});
 							});
