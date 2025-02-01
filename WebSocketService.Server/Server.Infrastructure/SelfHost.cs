@@ -9,50 +9,21 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Server.Application.ConfigurationApp;
 using Server.Application.Services;
 using Server.Domain.Messages;
-using Server.Infrastructure.ConfigurationApp;
 using Server.Infrastructure.Connection;
 using Server.Infrastructure.Controllers;
 using Server.Infrastructure.Hubs;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using System.Reflection;
+using Server.Application.Interfaces;
 
 namespace Server.Infrastructure
 {
-	/// <summary>
-	/// Служба обслуживания хоста
-	/// </summary>
-	public interface ISelfHost
-	{
-		/// <summary>
-		/// Запуск хостовой службы
-		/// </summary>
-		/// <param name="setting"></param>
-		/// <param name="cancellationToken"></param>
-		/// <returns></returns>
-		Task StartHostedServiceAsync(AppSetting setting, CancellationToken cancellationToken = default);
-
-		/// <summary>
-		/// Останов хостовой службы
-		/// </summary>
-		/// <param name="cancellationToken"></param>
-		/// <returns></returns>
-		Task StopHostedServiceAsync(CancellationToken cancellationToken = default);
-
-		/// <summary>
-		/// Перезапуск хостовой службы
-		/// </summary>
-		/// <param name="setting"></param>
-		/// <param name="cancellationToken"></param>
-		/// <returns></returns>
-		Task RebootHostedServiceAsync(AppSetting setting, CancellationToken cancellationToken = default);
-
-	}
-
 	/// <inheritdoc cref="ISelfHost"/>
-	public sealed class SelfHost : ISelfHost
+	public sealed class SelfHost : ISelfHost, IObserver<AppSetting>
 	{
 		#region fields
 
@@ -63,9 +34,10 @@ namespace Server.Infrastructure
 		private IHost? _host;
 
 		/// <inheritdoc cref="SelfHost"/>
-		public SelfHost(ILogService logger)
+		public SelfHost(ILogService logger, IConfigService configService)
 		{
 			_logger = logger;
+			configService.Subscribe(this);
 		}
 		#region implementation of ISelfHost
 
@@ -257,6 +229,18 @@ namespace Server.Infrastructure
 
 						});
 				}).Build().AsTask();
+
+		public void OnCompleted() =>
+			_logger.Write(new LogMessage("New configuration is pulled.",
+				nameof(SelfHost)));
+
+		public void OnError(Exception error) =>
+			_logger.Write(new LogError(error,
+				nameof(ConfigService),
+				error.Message));
+
+		public void OnNext(AppSetting value) => 
+			RebootHostedServiceAsync(value);
 	}
 
 }

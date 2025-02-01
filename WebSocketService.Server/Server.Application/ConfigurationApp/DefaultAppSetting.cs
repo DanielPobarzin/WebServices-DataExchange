@@ -1,4 +1,4 @@
-﻿namespace Server.Infrastructure.ConfigurationApp;
+﻿namespace Server.Application.ConfigurationApp;
 
 /// <summary>
 /// Настройки по умолчанию служб приложения
@@ -11,7 +11,14 @@ internal static class DefaultAppSetting
 	/// <remarks>
 	/// Применительно к источнику данных
 	/// </remarks>
-	public static string ConnectionString => "host=localhost;port=5432;Database=AlarmsExchange;Username=postgres;Password=19346jaidj";
+	public static string ConnectionString => "host=localhost;port=5432;Database=data_lake;Username=postgres;Password=19346jaidj";
+	/// <summary>
+	/// Строка подключения
+	/// </summary>
+	/// <remarks>
+	/// Применительно к источнику данных о пользователях для их аутентификации
+	/// </remarks>
+	public static string AuthDbConnectionString => "host=localhost;port=5432;Database=users;Username=postgres;Password=19346jaidj";
 	/// <summary>
 	/// Имя хоста 
 	/// </summary>

@@ -13,6 +13,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server.Domain", "Server.Dom
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server.Tests", "Server.Tests\Server.Tests.csproj", "{F2A11253-992B-4A07-9236-1F99035B164A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataBaseQueries", "DataBaseQueries", "{21FAE14D-5664-4A45-A65B-3C7023155F66}"
+	ProjectSection(SolutionItems) = preProject
+		CreateTable.sql = CreateTable.sql
+		CreateTrigger.sql = CreateTrigger.sql
+		FunctionNotify.sql = FunctionNotify.sql
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

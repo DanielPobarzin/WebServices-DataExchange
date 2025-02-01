@@ -2,7 +2,7 @@
 using Server.Application.Services;
 using Server.Domain.Messages;
 
-namespace Server.Infrastructure.ConfigurationApp
+namespace Server.Application.ConfigurationApp
 {
 	/// <summary>
 	/// Служба-обёртка, ограничивающая число выполнений переданной в неё функции некоторым промежутком времени

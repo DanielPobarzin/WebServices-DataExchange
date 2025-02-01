@@ -12,7 +12,6 @@
 
 	<ItemGroup>
 		<PackageReference Include="CSharpFunctionalExtensions" Version="3.4.3" />
-		<PackageReference Include="FluentValidation" Version="11.11.0" />
 		<PackageReference Include="FunctionalProgramming" Version="1.0.10" />
 		<PackageReference Include="LanguageExt.Core" Version="4.4.9" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.0.15" />

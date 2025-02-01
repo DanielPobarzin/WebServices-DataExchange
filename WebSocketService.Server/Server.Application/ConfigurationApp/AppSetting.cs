@@ -1,4 +1,4 @@
-﻿namespace Server.Infrastructure.ConfigurationApp
+﻿namespace Server.Application.ConfigurationApp
 {
 	/// <summary>
 	/// Настройки служб приложения
@@ -12,6 +12,14 @@
 		/// Применительно к источнику данных
 		/// </remarks>
 		public string ConnectionString { get; private set; } = DefaultAppSetting.ConnectionString;
+
+		/// <summary>
+		/// Строка подключения
+		/// </summary>
+		/// <remarks>
+		/// Применительно к источнику данных о пользователях для их аутентификации
+		/// </remarks>
+		public string AuthDbConnectionString { get; private set; } = DefaultAppSetting.ConnectionString;
 
 		/// <summary>
 		/// Имя хоста 
